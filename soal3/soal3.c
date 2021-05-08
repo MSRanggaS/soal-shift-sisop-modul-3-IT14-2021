@@ -29,7 +29,6 @@ void listdir(const char *name, char buff[][1337], int iter)
     struct dirent *dp;
     DIR *dir = opendir(name);
 
-    // Unable to open directory stream
     if (!dir)
         return;
 
@@ -37,7 +36,6 @@ void listdir(const char *name, char buff[][1337], int iter)
     {
         if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0)
         {
-            // Construct new path from our base path
             strcpy(path, name);
             strcat(path, "/");
             strcat(path, dp->d_name);
@@ -59,7 +57,6 @@ void count(const char *name)
     struct dirent *dp;
     DIR *dir = opendir(name);
 
-    // Unable to open directory stream
     if (!dir)
         return;
 
@@ -68,7 +65,6 @@ void count(const char *name)
         if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0)
         {
 
-            // Construct new path from our base path
             strcpy(path, name);
             strcat(path, "/");
             strcat(path, dp->d_name);
@@ -149,73 +145,79 @@ void *move(void* arg) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc == 1) {
-        printf("Butuh argumen tambahan -f / -d / *\n");
-        exit(EXIT_FAILURE);
-    }
-    if (strcmp(argv[1], "-f") != 0 && strcmp(argv[1], "*") != 0 && strcmp(argv[1], "-d")) {
-        printf("Argumen kurang benar\n");
-        exit(EXIT_FAILURE);
-    }
+  if (argc == 1) {
+      printf("Butuh argumen tambahan -f / -d / *\n");
+      exit(EXIT_FAILURE);
+  }
+  if (strcmp(argv[1], "-f") != 0 && strcmp(argv[1], "*") != 0 && strcmp(argv[1], "-d")) {
+      printf("Argumen kurang benar\n");
+      exit(EXIT_FAILURE);
+  }
 
-    if (strcmp(argv[1], "-f") == 0) {
-        if (argc <= 2) {
-        printf("Argumen kurang benar\n");
-        exit(EXIT_FAILURE);
-        }
+  if (strcmp(argv[1], "-f") == 0) {
+      if (argc <= 2) {
+      printf("Argumen kurang benar\n");
+      exit(EXIT_FAILURE);
+      }
 
-        pthread_t tid[argc-2];
-        for (int i = 2; i < argc; i++) {
-        pthread_create(&tid[i-2], NULL, &move, (void *)argv[i]);
-        }
-        for (int i = 2; i < argc; i++) {
-        pthread_join(tid[i-2], NULL);
-        }
-        exit(0);
-    }
+      pthread_t tid[argc-2];
+      int j=0,k=0;
+      while (j < argc) {
+        pthread_create(&tid[j-2], NULL, &move, (void *)argv[j]);
+        j++;
+      }
+      while (k < argc) {
+        pthread_join(tid[k-2], NULL);
+        k++;
+      }
+      exit(0);
+  }
 
-    char *directory;
-    if (strcmp(argv[1], "*") == 0) {
-        if (argc != 2) {
-        printf("Argumen kurang benar\n");
-        exit(EXIT_FAILURE);
-        }
-        char buff[1337];
-        getcwd(buff, sizeof(buff));
-        directory = buff;
-    }
+  char *directory;
+  if (strcmp(argv[1], "-d") == 0) {
+      if (argc != 3) {
+      printf("Argumen kurang benar\n");
+      exit(EXIT_FAILURE);
+      }
+      DIR* dir = opendir(argv[2]);
+      if (dir) {
+          directory = argv[2];
+      } else {
+          printf("Directory tidak ada\n");
+          exit(EXIT_FAILURE);
+      }
+      closedir(dir);
+  }
 
-    if (strcmp(argv[1], "-d") == 0) {
-        if (argc != 3) {
-        printf("Argumen kurang benar\n");
-        exit(EXIT_FAILURE);
-        }
-        DIR* dir = opendir(argv[2]);
-        if (dir) {
-            directory = argv[2];
-        } else {
-            printf("Directory tidak ada\n");
-            exit(EXIT_FAILURE);
-        }
-        closedir(dir);
-    }
+  if (strcmp(argv[1], "*") == 0) {
+      if (argc != 2) {
+      printf("Argumen kurang benar\n");
+      exit(EXIT_FAILURE);
+      }
+      char buff[1337];
+      getcwd(buff, sizeof(buff));
+      directory = buff;
+  }
 
-    count(directory);
+  count(directory);
 
-    pthread_t tid[file_count];
-    char buff[file_count][1337];
-    int iter = 0;
+  pthread_t tid[file_count];
+  char buff[file_count][1337];
+  int iter = 0;
 
-    listdir(directory, buff, iter);
+  listdir(directory, buff, iter);
 
-    for (int i = 0; i < file_count; i++) {
-        char  *test = (char*)buff[i];
-        // printf("%s\n", test);
-        pthread_create(&tid[i], NULL, &move, (void *)test);
-    }
+int p=0,q=0;
+  while (p < file_count ) {
+      char  *test = (char*)buff[p];
+      // printf("%s\n", test);
+      pthread_create(&tid[p], NULL, &move, (void *)test);
+      p++;
+  }
 
-    for (int i = 0; i < file_count; i++) {
-        pthread_join(tid[i], NULL);
-    }
+  while (q < file_count) {
+      pthread_join(tid[q], NULL);
+      q++;
+  }
 
 }
