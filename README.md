@@ -18,3 +18,103 @@ Disusun oleh :
 
 ---
 * [Soal 3]
+
+---
+
+## Soal 2a
+**Deskripsi:**\
+Membuat program perkalian matrix (4x3 dengan 3x6) dan menampilkan hasilnya. Matriks nantinya akan berisi angka 1-20 (tidak perlu dibuat filter angka).
+
+**Pembahasan:**\
+```c
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <stdlib.h>
+```
+* `#include <stdio.h>` Library untuk fungsi input-output (e.g. printf(), sprintf())
+* `#include <sys/ipc.h>` Library digunakan untuk tiga mekanisme interprocess communication (IPC)(e.g. semaphore)
+* `#include <sys/shm.h>` Library untuk mendefinisikan symbolic constants structure seperti(SHM_RDONLY,SHMLBA)
+* `#include <stdlib.h>` Library untuk fungsi umum (e.g. exit(), atoi())
+* `#include <unistd.h>` Llibrary untuk melakukan system call kepada kernel linux (e.g. fork())
+
+```c
+int mat1[4][3];
+int mat2[3][6];
+int mat3[4][6];
+int row = 0, i, j, k;
+```
+* mengidentifikasi `matriks1  4x3`, `matriks2 3x6`, `matriks3 4x6` 
+
+```c
+void input(int mat1[4][3], int mat2[3][6]) {
+    printf("Input matriks pertama 4x3\n");
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 3; j++) {
+            scanf("%d", &mat1[i][j]);
+        } 
+    }printf("\n");
+    printf("Input matriks kedua 3x6\n");
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 6; j++) {
+            scanf("%d", &mat2[i][j]);
+        } 
+    }printf("\n");
+}
+```
+* menjalankan program `mat1[4][3]` menggunakan fungsi for loop
+* setelah `mat1` sudah di proses maka akan melanjutkan program `mat2[3][6]` memakai fungsi for loop, lalu setelah selesai for loop akan menampilkan hasil `mat2` tersebut
+
+```c
+void mult(int mat1[4][3], int mat2[3][6], int mat3[4][6]) {
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 6; j++) {
+            mat3[i][j] = 0;
+            for (k = 0; k < 3; k++)
+                mat3[i][j] += mat1[i][k] * mat2[k][j];
+        }
+    }
+}
+```
+* memproses matriks3 terlebih dahulu dengan for loop 
+* Lalu hasil perkalian akan ditambahkan dan dimasukan ke `matriks3`. Pada case ini ordo matriks hasil adalah (4*5), karena ordo matriks hasil perkalian dua buah matriks adalah jumlah baris pertama dikali jumlah kolom ke dua.
+
+```c
+int main() {
+	key_t key = 6970;
+    int *value;
+    int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
+    value = shmat(shmid, NULL, 0);
+```
+- Disini kami membuat shared memory untuk `matriks3` sesuai dengan template pembuatan shared memory yang ada pada modul, karena nanti `matriks3` akan digunakan untuk acuan dari soal 4.b
+
+```c
+    input(mat1, mat2);
+    mult(mat1, mat2, mat3);
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 6; j++) {
+            printf("%d ", mat3[i][j]);
+        }
+        printf("\n");
+    }
+
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 6; j++) {
+            value[i * 6 + j] =  mat3[i][j];
+        }
+    }
+        sleep(15);
+    printf("Selesai ngirim\n");
+
+    shmdt(value);
+    shmctl(shmid, IPC_RMID, NULL);
+}
+```
+- aaaa
+
+## Soal 2b
+**Deskripsi:**\
+Membuat program dengan menggunakan matriks output dari program sebelumnya (program soal2a.c) (Catatan!: gunakan shared memory). Kemudian matriks tersebut akan dilakukan perhitungan dengan matrix baru (input user) sebagai berikut contoh perhitungan untuk matriks yang ada. Perhitungannya adalah setiap cel yang berasal dari matriks A menjadi angka untuk faktorial, lalu cel dari matriks B menjadi batas maksimal faktorialnya (dari paling besar ke paling kecil)
+
+**Pembahasan:**\
