@@ -117,4 +117,123 @@ int main() {
 **Deskripsi:**\
 Membuat program dengan menggunakan matriks output dari program sebelumnya (program soal2a.c) (Catatan!: gunakan shared memory). Kemudian matriks tersebut akan dilakukan perhitungan dengan matrix baru (input user) sebagai berikut contoh perhitungan untuk matriks yang ada. Perhitungannya adalah setiap cel yang berasal dari matriks A menjadi angka untuk faktorial, lalu cel dari matriks B menjadi batas maksimal faktorialnya (dari paling besar ke paling kecil)
 
-**Pembahasan:**\
+**Pembahasan:**
+```c
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <stdlib.h>
+#include <pthread.h> 
+#include <unistd.h>
+```
+* `#include <stdio.h>` Library untuk fungsi input-output (e.g. printf(), sprintf())
+* `#include <sys/ipc.h>` Library digunakan untuk tiga mekanisme interprocess communication (IPC)(e.g. semaphore)
+* `#include <sys/shm.h>` Library untuk mendefinisikan symbolic constants structure seperti(SHM_RDONLY,SHMLBA)
+* `#include <stdlib.h>` Library untuk fungsi umum (e.g. exit(), atoi())
+* `#include <unistd.h>` Llibrary untuk melakukan system call kepada kernel linux (e.g. fork())
+* `#include <pthread.h>` Library untuk operasi thread (e.g. pthread_create(), ptrhead_exit() )
+
+```c
+int row = 0, n, i, j, k, w, temp[24];
+int matb[4][6];
+struct tes{
+    int t;
+    int u;
+    int v;
+};
+```
+- Pertama kami membuat array dan matriks dengan ordo sesuai dengan output matriks soal 2
+- Mendefinisikan struct dengan atribut t, u, v  yang nanti digunakan sebagai baris dan kolom
+
+```c
+void input(int matb[4][6]) {
+    printf("Input matriks B 4x6\n");
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 6; j++) {
+            scanf("%d", &matb[i][j]);
+        } 
+    }printf("\n");
+}
+```
+- disini kita akan menginput sebuah matriks dengan ordo 4x6, `for()` loop yang pertama untuk ordo 4, dan `for()` loop yang kedua untuk ordo 6, lalu kita print hasilnya
+
+```c
+long factorial(int n) {  
+    if (n == 0)  
+        return 1;  
+    else  
+        return(n * factorial(n-1));  
+}  
+void* func(void* arg) {
+    int x;
+    int to = ((struct tes*)arg)->t;
+    int uo = ((struct tes*)arg)->u;
+    int vo = ((struct tes*)arg)->v;
+    x = to * 6 + uo;
+    w++;
+    if(vo >= matb[to][uo]){
+        temp[x]=factorial(vo)/factorial(vo-matb[to][uo]);
+    }
+    else if(matb[to][uo] > vo){
+        temp[x]=factorial(vo);
+    }
+    else if((vo == 0) && (matb[to][uo] == 0)){
+        temp[x] = 0;
+    }
+}
+```
+- Pendefinisian fungsi `penjumalah` dengan pembuatan `struct` yang akan menset atribut to, uo, vo nya keadalam variable t, u, v
+- For() loops disini akan berjalan dengan counter atribut-atribut yang akan di increment untuk setiap baris dan kolom dari matriks.
+
+```c
+int main() {
+	key_t key = 6970;
+    int *value;
+    int cell;
+    int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
+    value = shmat(shmid, NULL, 0);
+```
+- Pada `main()`, pertama-tama kami akan membuat shared memory untuk matriks, sesuai dengan template pembuatan shared memory yang ada pada modul
+
+```c
+    printf("Matriks A 4x6\n");
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 6; j++) {
+            printf("%d ", value[i * 6 + j]);
+        } printf("\n");
+    } printf("\n");
+    input(matb);
+    printf("Matriks B 4x6\n");
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 6; j++) {
+            printf("%d ", matb[i][j]);
+        } printf("\n");
+    } printf("\n");
+    pthread_t tid[24];
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 6; j++) {
+            cell = value[i * 6 + j];
+            struct tes *cek = (struct tes*)malloc(sizeof(struct tes));
+            cek->t = i;
+            cek->u = j;
+            cek->v = cell;
+            pthread_create(&(tid[i * 6 + j]), NULL, &func, (void*) cek);
+        } 
+    } 
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 6; j++) {
+            pthread_join(tid[i * 6 + j], NULL);
+        }
+    }
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 6; j++) {
+            printf("%d ", temp[i * 6 + j]);
+        }printf("\n");
+    }printf("\n");
+
+    shmdt(value);
+    shmctl(shmid, IPC_RMID, NULL);
+}
+```
+- pertama menjalankan matriks A yang uda ada pada penjelasan sebelumnya.
+- Setelah matriks A selesai maka akan menjalankan matriks B
