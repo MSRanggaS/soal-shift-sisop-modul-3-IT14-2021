@@ -20,12 +20,12 @@ Disusun oleh :
 * [Soal 3]
 
 ---
-## Soal 1
+# Soal 1
 **Deskripsi:**\
 Pada saat client tersambung dengan server, terdapat dua pilihan pertama, yaitu register dan login. Jika memilih register, client akan diminta input id dan passwordnya untuk dikirimkan ke server. User juga dapat melakukan login. Login berhasil jika id dan password yang dikirim dari aplikasi client sesuai dengan list akun yang ada didalam aplikasi server. Sistem ini juga dapat menerima multi-connections. Koneksi terhitung ketika aplikasi client tersambung dengan server. Jika terdapat 2 koneksi atau lebih maka harus menunggu sampai client pertama keluar untuk bisa melakukan login dan mengakses aplikasinya. Keverk menginginkan lokasi penyimpanan id dan password pada file bernama akun.txt
 
 **Pembahasan:**
-# Client
+## Client
 ```c
 #include <stdio.h>
 #include <sys/socket.h>
@@ -129,7 +129,7 @@ int main(int argc, char const *argv[]) {
 }
 ```
 
-# Server
+## Server
 ```c
 #include <stdio.h>
 #include <sys/socket.h>
@@ -318,7 +318,7 @@ int main() {
     int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
     value = shmat(shmid, NULL, 0);
 ```
-- Disini kami membuat shared memory untuk `matriks3` sesuai dengan template pembuatan shared memory yang ada pada modul, karena nanti `matriks3` akan digunakan untuk acuan dari soal 4.b
+- Disini kami membuat shared memory untuk `matriks3` sesuai dengan template pembuatan shared memory yang ada pada modul, karena nanti `matriks3` akan digunakan untuk acuan dari soal 2.b
 
 ```c
     input(mat1, mat2);
@@ -342,7 +342,7 @@ int main() {
     shmctl(shmid, IPC_RMID, NULL);
 }
 ```
-- aaaa
+- input `mat1` dan `mat2`, lalu `mat3`. output dari `mat3` sendiri adalah dari perkalian `mat1` dan `mat2` yang akan menghasilkan matriks 4x6. setelah output mat3 keluar akan `sleep(15)` lalu akan keluar `selesai mengirim`
 
 ## Soal 2b
 **Deskripsi:**\
@@ -468,3 +468,103 @@ int main() {
 ```
 - pertama menjalankan matriks A yang uda ada pada penjelasan sebelumnya.
 - Setelah matriks A selesai maka akan menjalankan matriks B
+
+## soal 2c
+**Deskripsi:**\
+Karena takut lag dalam pengerjaannya membantu Loba, Crypto juga membuat program (soal2c.c) untuk mengecek 5 proses teratas apa saja yang memakan resource komputernya dengan command “ps aux | sort -nrk 3,3 | head -5”
+
+**Pembahasan:**
+```c
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+```
+- `#include <stdio.h>` Library untuk fungsi input-output (e.g. printf(), sprintf())
+- `#include <stdlib.h>` Library untuk fungsi umum (e.g. exit(), atoi())
+- `#include <unistd.h>` Llibrary untuk melakukan system call kepada kernel linux (e.g. fork())
+- `#include <sys/types.h>` Library tipe data khusus (e.g. pid_t)
+- `#include<sys/wait.h>` Library untuk pendefinisian symbolic constants untuk penggunaan waitpid(): (e.g. WNOHANG)
+
+```c
+int main() {
+    pid_t child_id;
+    int status;
+    int fp1[2];
+    int fp2[2];
+    char output[1000];
+```
+- mendefinisikan `int main()`
+
+```c
+    if (pipe(fp1)==-1){
+        fprintf(stderr, "Pipe Failed" );
+        return 1;
+    }
+    
+    if (pipe(fp2)==-1){
+        fprintf(stderr, "Pipe Failed" );
+        return 1;
+    }
+    
+    child_id = fork();
+        if (child_id < 0) {
+        exit(EXIT_FAILURE);
+    }
+```
+- jika `pipe(fp1)` dan `pipe(fp2)` `==-1`, maka akan `Pipe Failed`
+
+```c
+   if (child_id == 0) {
+        close(fp1[0]);
+        dup2(fp1[1], STDOUT_FILENO);
+        char *argv[] = {"ps","aux", NULL};
+        execv("/bin/ps", argv);
+    } else {
+        // this is parent
+        while ((wait(&status)) > 0);
+        child_id = fork();
+        if (child_id < 0) {
+            exit(EXIT_FAILURE);
+        }
+        if (child_id == 0){
+            close(fp1[1]);
+            dup2(fp1[0], STDIN_FILENO);
+            close(fp2[0]);
+            dup2(fp2[1], STDOUT_FILENO);
+            char *argv[] = {"sort", "-nrk", "3,3", NULL};
+            execv("/usr/bin/sort", argv);
+        }else{
+            close(fp2[1]);
+            close(fp1[1]);
+            while ((wait(&status)) > 0);
+            dup2(fp2[0], STDIN_FILENO);
+            char *argv[] = {"head", "-5", NULL};
+            execv("/usr/bin/head", argv);
+        }
+    }
+}
+```
+- Disini akan dilakukan `fork()` dan untuk parent proccesnya, dia akan membuat copy `fp[1]` yang berfungsi sebagai `write` end dari pipe
+- Selanjutnya akan dilakukan pengecekan program diatas agar tidak terjadi kendala lag pada saat menjalankannya dengan perintah `for()` pada setiap command `“ps aux | sort -nrk 3,3 | head -5”`
+ 
+## soal 3
+
+```c
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <ctype.h>
+#include <dirent.h>
+#include <pthread.h>
+#include <errno.h>
+```
+- pertama kita masukkan library yang akan digunakan nantinya
+
+```c
+
+```
