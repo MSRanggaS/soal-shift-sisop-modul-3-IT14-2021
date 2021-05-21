@@ -640,31 +640,38 @@ Pada running.log akan merekap apa saja yang terjadi pada file di server
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845185461306785862/1h.jpg">
 
 ## 2a.
+Membuat sebuah program perkalian matriks dengan shared memory.
 
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845197525127397376/2a.jpg">
 
 ## 2b.
+Hasil perkalian matriks pada program 2a dilakukan perhitungan dimana setiap cel yang berasal dari matriks A menjadi angka untuk faktorial, lalu cel dari matriks B menjadi batas maksimal faktorialnya.
 
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845197541820858389/2b.jpg">
 
 ## 2c.
+Menampilkan 5 proses teratas apa saja yang memakan resource komputer.
 
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845197561521635368/2c.jpg">
 
 ## 3a. 
+File file awal yang akan dikategorikan
 
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845198348381585458/3ori.jpg">
 
 ### argumen -f
+Mengkategorikan 2 file dari folder soal3
 
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845198362159349820/3a.jpg">
 
 ## 3b.
 ### argumen -d
+Mengkategorikan folder soal3
 
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845198370699083786/3b.jpg">
 
 ## 3c.
 ### argumen *
+Mengkategorikan seluruh file pada direktori tersebut, terlihat bahwa file program3 dan program3.c juga ikut dikategorikan.
 
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845198372506959872/3c.jpg">
