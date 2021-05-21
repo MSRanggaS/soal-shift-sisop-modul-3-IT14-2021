@@ -12,19 +12,110 @@ Disusun oleh :
 
 ---
 * [Soal 1]
+- [Soal](soal-no1)
+- [Pembahasan](pembahasan-no1)
 
 ---
 * [Soal 2]
+- [soal](soal-no2)
+- [pembahasan](pembahasan-no2)
 
 ---
 * [Soal 3]
+- [soal](soal-no3)
+- [pembahasan](pembahasan-no3)
 
 ---
-# Soal 1
-**Deskripsi:**\
-Pada saat client tersambung dengan server, terdapat dua pilihan pertama, yaitu register dan login. Jika memilih register, client akan diminta input id dan passwordnya untuk dikirimkan ke server. User juga dapat melakukan login. Login berhasil jika id dan password yang dikirim dari aplikasi client sesuai dengan list akun yang ada didalam aplikasi server. Sistem ini juga dapat menerima multi-connections. Koneksi terhitung ketika aplikasi client tersambung dengan server. Jika terdapat 2 koneksi atau lebih maka harus menunggu sampai client pertama keluar untuk bisa melakukan login dan mengakses aplikasinya. Keverk menginginkan lokasi penyimpanan id dan password pada file bernama akun.txt
+# Soal no1
+Keverk adalah orang yang cukup ambisius dan terkenal di angkatannya. Sebelum dia menjadi ketua departemen di HMTC, dia pernah mengerjakan suatu proyek dimana keverk tersebut meminta untuk membuat server database buku. Proyek ini diminta agar dapat digunakan oleh pemilik aplikasi dan diharapkan bantuannya dari pengguna aplikasi ini.
 
-**Pembahasan:**
+Di dalam proyek itu, Keverk diminta: 
+
+a). Pada saat client tersambung dengan server, terdapat dua pilihan pertama, yaitu register dan login. Jika memilih register, client akan diminta input id dan passwordnya untuk dikirimkan ke server. User juga dapat melakukan login. Login berhasil jika id dan password yang dikirim dari aplikasi client sesuai dengan list akun yang ada didalam aplikasi server. Sistem ini juga dapat menerima multi-connections. Koneksi terhitung ketika aplikasi client tersambung dengan server. Jika terdapat 2 koneksi atau lebih maka harus menunggu sampai client pertama keluar untuk bisa melakukan login dan mengakses aplikasinya. Keverk menginginkan lokasi penyimpanan id dan password pada file bernama akun.txt dengan format :
+
+**akun.txt**
+```
+id:password
+id2:password2
+```
+
+b). Sistem memiliki sebuah database yang bernama files.tsv. Isi dari files.tsv ini adalah path file saat berada di server, publisher, dan tahun publikasi. Setiap penambahan dan penghapusan file pada folder file yang bernama  FILES pada server akan memengaruhi isi dari files.tsv. Folder FILES otomatis dibuat saat server dijalankan. 
+
+c). Tidak hanya itu, Keverk juga diminta membuat fitur agar client dapat menambah file baru ke dalam server. Direktori FILES memiliki struktur direktori di bawah ini : 
+
+Direktori **FILES** 
+```
+File1.ekstensi
+File2.ekstensi
+```
+
+Pertama client mengirimkan input ke server dengan struktur sebagai berikut :
+Contoh Command Client :
+```
+add
+```
+
+Output Client Console:
+```
+Publisher:
+Tahun Publikasi:
+Filepath:
+```
+Kemudian, dari aplikasi client akan dimasukan data buku tersebut (perlu diingat bahwa Filepath ini merupakan path file yang akan dikirim ke server). Lalu client nanti akan melakukan pengiriman file ke aplikasi server dengan menggunakan socket. Ketika file diterima di server, maka row dari files.tsv akan bertambah sesuai dengan data terbaru yang ditambahkan.
+
+d). Dan client dapat mendownload file yang telah ada dalam folder FILES di server, sehingga sistem harus dapat mengirim file ke client. Server harus melihat dari files.tsv untuk melakukan pengecekan apakah file tersebut valid. Jika tidak valid, maka mengirimkan pesan error balik ke client. Jika berhasil, file akan dikirim dan akan diterima ke client di folder client tersebut. 
+
+Contoh Command client
+```
+download TEMPfile.pdf
+```
+
+e). Setelah itu, client juga dapat menghapus file yang tersimpan di server. Akan tetapi, Keverk takut file yang dibuang adalah file yang penting, maka file hanya akan diganti namanya menjadi ‘old-NamaFile.ekstensi’. Ketika file telah diubah namanya, maka row dari file tersebut di file.tsv akan terhapus.
+
+Contoh Command Client:
+```
+delete TEMPfile.pdf
+```
+
+f). Client dapat melihat semua isi files.tsv dengan memanggil suatu perintah yang bernama see. Output dari perintah tersebut keluar dengan format. 
+
+Contoh Command Client :
+```
+see
+```
+
+Contoh Format Output pada Client:
+```
+Nama:
+Publisher:
+Tahun publishing:
+Ekstensi File : 
+Filepath : 
+
+Nama:
+Publisher:
+Tahun publishing:
+Ekstensi File : 
+Filepath : 
+
+```
+
+g). Aplikasi client juga dapat melakukan pencarian dengan memberikan suatu string. Hasilnya adalah semua nama file yang mengandung string tersebut. Format output seperti format output f.
+Contoh Client Command:
+```
+find TEMP
+```
+
+h). Dikarenakan Keverk waspada dengan pertambahan dan penghapusan file di server, maka Keverk membuat suatu log untuk server yang bernama `running.log`. Contoh isi dari log ini adalah
+
+`running.log`
+```
+Tambah : File1.ektensi (id:pass)
+Hapus : File2.ektensi (id:pass)
+```
+
+
+# Pembahasan no1
 ## Client
 ```c
 #include <stdio.h>
@@ -34,14 +125,21 @@ Pada saat client tersambung dengan server, terdapat dua pilihan pertama, yaitu r
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <math.h>
+
 #define PORT 8080
-  
+
 int main(int argc, char const *argv[]) {
     struct sockaddr_in address;
-    int sock = 0, valread;
+    int sock = 0;
     struct sockaddr_in serv_addr;
-    char *hello = "Hello from client";
+
+    // msg for server
+    char input[1024];
+
+    // msg from server
     char buffer[1024] = {0};
+
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         printf("\n Socket creation error \n");
         return -1;
@@ -52,80 +150,162 @@ int main(int argc, char const *argv[]) {
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT);
       
-    if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0) {
+    if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
         printf("\nInvalid address/ Address not supported \n");
         return -1;
     }
   
+  // jika gagal menyambungkan ke server manapun maka tampil "Connection Failed"
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
         printf("\nConnection Failed \n");
         return -1;
     }
 
-    char choice[8];
-    char username[12];
-    char password[50];
-    valread = read( sock , buffer, 1024);
-    printf("%s\n",buffer );
-    printf("\n----------WELCOME----------");
-    printf("\n1. Register");
-    printf("\n2. Login");
-    printf("\nChoose : ");
-    scanf("%s", choice);
-    if(strcmp(choice, "register") == 0 || strcmp(choice, "Register") == 0 || strcmp(choice, "REGISTER") == 0)
-    {
-        send(sock, choice, strlen(choice), 0);
-        printf("\nRegister");
-        printf("\nUsername : ");
-        scanf("%s", username);
-        send(sock, username, strlen(username), 0);
-        printf("Password : ");
-        scanf("%s", password);
-        send(sock, password, strlen(password), 0);
-        printf("Register Success\n");
-    }
-    else if(strcmp(choice, "login") == 0 || strcmp(choice, "Login") == 0 || strcmp(choice, "LOGIN") == 0 )
-    {
-        send(sock, choice, strlen(choice), 0);
-        printf("\nLogin");
-        printf("\nUsername : ");
-        scanf("%s", username);
-        send(sock, username, strlen(username), 0);
-        printf("Password : ");
-        scanf("%s", password);
-        send(sock, password, strlen(password), 0);
-        memset(buffer, 0, 1024);
-        valread = read(sock, buffer, 1024);
+
+    // code here
+
+    // login/register
+    do {
+        memset(buffer, 0, sizeof(buffer));
+        read(sock, buffer, sizeof(buffer));
+        printf("login/register: ");
+        scanf("%s", input);
+        send(sock, input, strlen(input), 0);
+        memset(input, 0, sizeof(input));
+
+        // id
+        memset(buffer, 0, sizeof(buffer));
+        read(sock, buffer, sizeof(buffer));
+        printf("id: ");
+        scanf("%s", input);
+        send(sock, input, strlen(input), 0);
+        memset(input, 0, sizeof(input));
+
+        // pwd
+        memset(buffer, 0, sizeof(buffer));
+        read(sock, buffer, sizeof(buffer));
+        printf("password: ");
+        scanf("%s", input);
+        send(sock, input, strlen(input), 0);
+        memset(input, 0, sizeof(input));
+
+        // success or fail
+        read(sock, buffer, 1024);
         printf("%s\n", buffer);
-        if(strcmp(buffer, "Login Success") == 0)
-        {
-            printf("lanjutt\n");
+    } while (strcmp(buffer, "login success") != 0);
+
+    printf("\n");
+
+    // logged in
+    while (1) {
+        memset(buffer, 0, sizeof(buffer));
+        printf("command: ");
+        scanf("\n");
+        scanf("%[^\n]%*c", input);
+        if (strncmp(input, "add", 3) == 0) {
+            send(sock, input, sizeof(input), 0);
+            
+            // publisher
+            memset(input, 0, sizeof(input));
+            printf("Publisher: ");
+            scanf("%s", input);
+            send(sock, input, sizeof(input), 0);
+
+            // year
+            memset(input, 0, sizeof(input));
+            printf("Tahun publikasi: ");
+            scanf("%s", input);
+            send(sock, input, sizeof(input), 0);
+
+            // filepath
+            memset(input, 0, sizeof(input));
+            printf("Filepath: ");
+            scanf("%s", input);
+            send(sock, input, sizeof(input), 0);
+
+            // send file
+            char file_length[1024];
+            char *file_content = (char *)malloc(sizeof(char) * 65536);
+
+            memset(file_length, 0, sizeof(file_length));
+
+            FILE *fptr;
+            fptr = fopen(input, "r");
+
+            fseek(fptr, 0, SEEK_END);
+            long fsize = ftell(fptr);
+            rewind(fptr);
+
+            fread(file_content, 1, fsize, fptr);
+
+            fclose(fptr);
+
+            // send file size
+            sprintf(file_length, "%ld", fsize);
+            send(sock, file_length, sizeof(file_length), 0);
+            sleep(1);
+
+            // send file content
+            for (long i = 0; i < fsize; i += 1024) {
+                memset(buffer, 0, sizeof(buffer));
+                sprintf(buffer, "%.*s", fsize < 1024 ? fsize : abs(fsize - i) < 1024 ? abs(fsize - 1) : 1024, file_content + i);
+                send(sock, buffer, sizeof(buffer), 0);
+            }
+        } else if (strncmp(input, "download", 8) == 0) {
+            send(sock, input, sizeof(input), 0);
+            read(sock, buffer, 1024);
+
+            if (strcmp(buffer, "found") == 0) {
+                // receive file
+                char file_content[65535];
+                char file_length[1024];
+                long fsize;
+                char file_to_save[50];
+                sprintf(file_to_save, "%.*s", strlen(input) - 9, input + 9);
+
+                memset(file_content, 0, sizeof(file_content));
+                memset(file_length, 0, sizeof(file_length));
+
+                // receive file size
+                read(sock, file_length, 1024);
+                fsize = strtol(file_length, NULL, 0);
+
+                // receive file content
+                for (long i = 0; i < fsize; i += 1024) {
+                    memset(buffer, 0, sizeof(buffer));
+                    read(sock, buffer, 1024);
+                    strcat(file_content, buffer);
+                }
+
+                FILE *fptr;
+                fptr = fopen(file_to_save, "w");
+
+                fprintf(fptr, "%s", file_content);
+
+                fclose(fptr);
+            } else {
+                printf("file not found\n");
+            }
+        } else if (strncmp(input, "delete", 6) == 0) {
+            send(sock, input, sizeof(input), 0);
+        } else if (strncmp(input, "see", 3) == 0) {
+            send(sock, input, sizeof(input), 0);
+            read(sock, buffer, 1024);
+            printf("%s\n", buffer);
+        } else if (strncmp(input, "find", 4) == 0) {
+            send(sock, input, sizeof(input), 0);
+            read(sock, buffer, 1024);
+            printf("%s\n", buffer);
+        } else {
+            send(sock, input, sizeof(input), 0);
+            break;
         }
-        else if(strcmp(buffer, "Login Failed") == 0)
-        {
-            printf("gagall\n");
-        }
-        else
-        {
-            printf("Error\n");
-            return 0;
-        }
+
+        memset(input, 0, sizeof(input));
+        printf("\n");
     }
-    else if(strcmp(choice, "exit") == 0 || strcmp(choice, "Exit") == 0 || strcmp(choice, "EXIT") == 0)
-    {
-        send(sock, choice, strlen(choice), 0);
-        return 0;
-    }
-    else
-    {
-        printf("Your Choice Not Found\n");
-    }
-    // send(sock , hello , strlen(hello) , 0 );
-    // printf("Hello message sent\n");
-    // valread = read( sock , buffer, 1024);
-    // printf("%s\n",buffer );
-    // return 0;
-    
+
+    return 0;
 }
 ```
 
@@ -133,36 +313,278 @@ int main(int argc, char const *argv[]) {
 ```c
 #include <stdio.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
 #include <unistd.h>
-#include <pthread.h>
-#include <asm-generic/socket.h>
+#include <dirent.h>
+#include <ctype.h>
+#include <math.h>
+
+//mendefinisikan port server
 #define PORT 8080
+#define SO_REUSEPORT 15
 
-int server_fd, new_socket, new_socket2, valread;
-struct sockaddr_in address;
-int opt = 1;
-int addrlen = sizeof(address);
-char buffer[1024] = {0};
-FILE *listakun;
-pthread_t tid[2];
-pthread_mutex_t lock;	
-struct Akun Acc;
+int n;
 
-struct Akun
-{
-    char username[12];
-    char password[50];
+//membuat struct user yg terdiri dari nama user dan password
+struct user {
+    char name[50];
+    char pwd[50];
 };
 
+//membuat struct file yang terdiri nama file dan path filenya
+struct file {
+    char name[50];
+    char path[50];
+    char publisher[50];
+    char ext[20];
+    char year[5];
+};
+
+char *file_ext(char *file) {
+    char *p = strchr(file, '.');
+    if (p == NULL) return "exe";
+    if (p - file == 6) {
+        p = strchr(p+1, '.');
+    }
+
+    char *ext;
+    ext = (char *)malloc(sizeof(char*) * 50);
+    sprintf(ext, "%.*s", strlen(file) - (p - file + 1), p + 1);
+    for (size_t i = 0; i < strlen(ext); ++i) {
+        *(ext + i) = tolower(*(ext + i));
+    }
+    return ext;
+}
+
+// untuk melihat file yang ada telah dibuat
+char *see(struct file files[], int n) {
+    char *buf;
+    buf = (char *)malloc(sizeof(char) * 1024);
+    memset(buf, 0, sizeof(buf));
+
+    /*
+        Nama: 
+        Publisher:
+        Tahun publishing:
+        Ekstensi File : 
+        Filepath : 
+    */
+
+    for (int i = 0; i < n; ++i) {
+        sprintf(files[i].ext, "%s", file_ext(files[i].path));
+        char *p = strstr(files[i].path, files[i].ext);
+        if (p == NULL) {
+            sprintf(files[i].name, "%.*s", strlen(files[i].path) - 6, files[i].path + 6);
+        } else {
+            sprintf(files[i].name, "%.*s", strlen(files[i].path) - 6, files[i].path + 6);
+        }
+        
+        sprintf(buf, "%s\nNama: %s\nPublisher: %s\nTahun publishing: %s\nEkstensi File: %s\nFilepath: %s\n", buf, files[i].name, files[i].publisher, files[i].year, files[i].ext, files[i].path);
+    }
+
+    return buf;
+}
+
+// untuk mencari user yang ada
+int find_user(char *name, char *pwd) {
+    // printf("%s:%s %d:%d\n", name, pwd, strlen(name), strlen(pwd));
+    int n = 0, mode = 0;
+
+    struct user users[50];
+
+    for (int i = 0; i < 50; ++i) {
+        memset(users[i].name, 0, sizeof(users[i].name));
+        memset(users[i].pwd, 0, sizeof(users[i].pwd));
+    }
+
+    FILE *fptr;
+    //membuka dan membaca di file akun.txt
+    fptr = fopen("akun.txt", "r");
+
+    fseek(fptr, 0, SEEK_END);
+    long fsize = ftell(fptr);
+    rewind(fptr);
+
+    char *str = (char *)malloc(sizeof(char) * (fsize + 1));
+    fread(str, 1, fsize, fptr);
+
+    for (int i = 0; i <= fsize; ++i) {
+        if (str[i] == ':') {
+            mode ^= 1;
+            continue;
+        }
+        if (str[i] == '\n' || str[i] == ' ') {
+            mode ^= 1;
+            ++n;
+            continue;
+        }
+
+        if (mode == 0) {
+            sprintf(users[n].name, "%s%c", users[n].name, str[i]);
+        } else {
+            sprintf(users[n].pwd, "%s%c", users[n].pwd, str[i]);
+        }
+    }
+
+    fclose(fptr);
+
+    for (int i = 0; i < n; ++i) {
+        // printf("%s:%s %d:%d\n", users[i].name, users[i].pwd, strlen(users[i].name), strlen(users[i].pwd));
+        if (strcmp(users[i].name, name) == 0 && strcmp(users[i].pwd, pwd) == 0) {
+            return 1;
+        }
+    }
+    
+    return 0;
+}
+
+//fungsi register
+void reg(char *name, char *pwd) {
+    FILE *fptr;
+
+    //membuat file dengan nama akun.txt
+    fptr = fopen("akun.txt", "a");
+
+    // isinya id sama password yg terdaftar
+    fprintf(fptr, "%s:%s\n", name, pwd);
+    
+    fclose(fptr);
+}
+
+//membuat struct files yang akan menjadi databasenya
+struct file *parse_files() {
+    n = 0;
+    int mode = 0;
+
+    struct file *files;
+    files = (struct file *)malloc(sizeof(struct file) * 50);
+
+    for (int i = 0; i < 5; ++i) {
+        //data yang akan diisikan berupa nama file, path filenya, nama publisher dan tahun publishnya
+        memset(files[i].ext, 0, sizeof(files[i].ext));
+        memset(files[i].name, 0, sizeof(files[i].name));
+        memset(files[i].path, 0, sizeof(files[i].path));
+        memset(files[i].publisher, 0, sizeof(files[i].publisher));
+        memset(files[i].year, 0, sizeof(files[i].year));
+    }
+
+    FILE *fptr;
+    //membuka file.tsv untuk menambahkan data di atas
+    fptr = fopen("files.tsv", "r");
+
+    //untuk membaca file  mulai dari offset yang diinginkan
+    fseek(fptr, 0, SEEK_END); // offset dipindah relatif terhadap offset terakhir file.
+    long fsize = ftell(fptr); // mengembalikan nilai saat ini dari posisi identifier.
+    rewind(fptr);
+
+    char *str = (char *)malloc(sizeof(char) * (fsize + 1));
+    //membaca kalimat dalam sebuah FILE yang sudah dibuka di file.tsv
+    fread(str, 1, fsize, fptr);
+
+    for (int i = 0; i <= fsize; ++i) {
+        if (str[i] == '\t') {
+            mode += 1;
+            continue;
+        }
+        if (str[i] == '\n') {
+            mode = 0;
+            ++n;
+            continue;
+        }
+
+        if (mode == 0) {
+            sprintf(files[n].path, "%s%c", files[n].path, str[i]);
+        } else if (mode == 1) {
+            sprintf(files[n].publisher, "%s%c", files[n].publisher, str[i]);
+        } else {
+            sprintf(files[n].year, "%s%c", files[n].year, str[i]);
+        }
+    }
+
+    for (int i = 0; i < n; ++i) {
+        sprintf(files[i].ext, "%s", file_ext(files[i].path));
+        char *p = strstr(files[i].path, files[i].ext);
+        if (p == NULL) {
+            sprintf(files[i].name, "%.*s", strlen(files[i].path) - 6, files[i].path + 6);
+        } else {
+            sprintf(files[i].name, "%.*s", strlen(files[i].path) - 6, files[i].path + 6);
+        }
+    }
+
+    fclose(fptr);
+
+    return files;
+}
+
+//fungsi delete untuk menghapus file yang sudah ditambahkan sebelumnya
+void delete(char *file) {
+    struct file *files = parse_files();
+    struct file *new_files = (struct file *)malloc(sizeof(struct file) * 50);
+    int j = 0;
+    for (int i = 0; i < n; ++i) {
+        if (strcmp(files[i].name, file) == 0) {
+            continue;
+        }
+
+        sprintf(new_files[j].ext, "%s", files[i].ext);
+        sprintf(new_files[j].name, "%s", files[i].name);
+        sprintf(new_files[j].path, "%s", files[i].path);
+        sprintf(new_files[j].publisher, "%s", files[i].publisher);
+        sprintf(new_files[j].year, "%s", files[i].year);
+
+        ++j;
+    }
+
+    if (j == n) return;
+
+    //nama file sebelum dihapus
+    char old_name[50];
+    sprintf(old_name, "FILES/%s", file);
+
+    //nama file setelah dihapus
+    char new_name[50];
+    sprintf(new_name, "FILES/old-%s", file);
+
+    //jika gagal merename nama file yang akan dihapus maka tampilkan "error renaming (nama file sebelum dihapus) to (nama file sesudah dihapus)"
+    if (rename(old_name, new_name) < 0) {
+        printf("error renaming %s to %s\n", old_name, new_name);
+    }
+
+    FILE *fptr;
+    
+    //membuka database file.tsv kemudian menuliskan atau mengedit yang ada di sana
+    fptr = fopen("files.tsv", "w");
+
+    for (int i = 0; i < j; ++i) {
+        fprintf(fptr, "%s\t%s\t%s\n", new_files[i].path, new_files[i].publisher, new_files[i].year);
+        // printf("%s\t%s\t%s\n", new_files[i].path, new_files[i].publisher, new_files[i].year);
+    }
+
+    fclose(fptr);
+}
+
 int main(int argc, char const *argv[]) {
-    int server_fd, new_socket, valread;
+    int server_fd, new_socket;
     struct sockaddr_in address;
     int opt = 1;
     int addrlen = sizeof(address);
+
+    // msg for client
+    char *login_or_register = "login/register: ";
+    char *id = "id: ";
+    char *pwd = "password: ";
+    char *login_success = "login success";
+    char *login_fail = "login failed";
+    char *register_success = "register success";
+    char *file_pattern_not_found = "file pattern doesn't match";
+
+    // msg from client
     char buffer[1024] = {0};
+    char user_id[1024];
+    char user_pwd[1024];
       
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         perror("socket failed");
@@ -188,69 +610,244 @@ int main(int argc, char const *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
-        perror("accept");
-        exit(EXIT_FAILURE);
+    // 
+    mkdir("FILES", 0755);
+
+    while (1) {
+        if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
+            perror("accept");
+            exit(EXIT_FAILURE);
+        }
+
+        // code here
+        while (1) {
+            send(new_socket, login_or_register, strlen(login_or_register), 0);
+            read(new_socket, buffer, 1024);
+            printf("user %s\n", buffer);
+
+            memset(user_id, 0, sizeof(user_id));
+            memset(user_pwd, 0, sizeof(user_pwd));
+
+            if (strcmp(buffer, "register") == 0) {
+                // id
+                send(new_socket, id, strlen(id), 0);
+                read(new_socket, user_id, 1024);
+                printf("id: %s\n", user_id);
+                
+                // pwd
+                send(new_socket, pwd, strlen(pwd), 0);
+                read(new_socket, user_pwd, 1024);
+                printf("password: %s\n", user_pwd);
+
+                reg(user_id, user_pwd);
+                send(new_socket, register_success, strlen(register_success), 0);
+            } else if (strcmp(buffer, "login") == 0) {
+                // id
+                send(new_socket, id, strlen(id), 0);
+                read(new_socket, user_id, 1024);
+                printf("id: %s\n", user_id);
+                
+                // pwd
+                send(new_socket, pwd, strlen(pwd), 0);
+                read(new_socket, user_pwd, 1024);
+                printf("password: %s\n", user_pwd);
+
+                if (find_user(user_id, user_pwd)) {
+                    send(new_socket, login_success, strlen(login_success), 0);
+                    printf("%s\n", login_success);
+                    break;
+                } else {
+                    send(new_socket, login_fail, strlen(login_fail), 0);
+                    printf("%s\n", login_fail);
+                }
+            }
+
+            memset(buffer, 0, sizeof(buffer));
+            sleep(2);
+        }
+        printf("\n");
+
+        while (1) {
+            memset(buffer, 0, sizeof(buffer));
+            read(new_socket, buffer, 1024);
+
+            if (strncmp(buffer, "add", 3) == 0) {
+                printf("user add\n");
+                char publisher[1024];
+                char year[1024];
+                char path[1024];
+                char filepath[1024];
+
+                read(new_socket, publisher, 1024);
+                printf("Publisher: %s\n", publisher);
+
+                read(new_socket, year, 1024);
+                printf("Tahun Publikasi: %s\n", year);
+
+                read(new_socket, path, 1024);
+                printf("Filepath: %s\n", path);
+
+
+                sprintf(filepath, "FILES/%s", path);
+                // printf("%s\n", filepath);
+
+                // tsv
+                FILE *fptr;
+
+                fptr = fopen("files.tsv", "a");
+                fprintf(fptr, "%s\t%s\t%s\n", filepath, publisher, year);
+                fclose(fptr);
+
+                // log
+                fptr = fopen("running.log", "a");
+                fprintf(fptr, "Tambah : %s (%s:%s)\n", filepath, user_id, user_pwd);
+                fclose(fptr);
+
+                // receive file
+                char file_content[65535];
+                char file_length[1024];
+                unsigned long fsize;
+
+                memset(file_content, 0, sizeof(file_content));
+                memset(file_length, 0, sizeof(file_length));
+
+                // receive file size
+                read(new_socket, file_length, 1024);
+                fsize = strtol(file_length, NULL, 0);
+
+                // receive file content
+                for (long i = 0; i < fsize; i += 1024) {
+                    memset(buffer, 0, sizeof(buffer));
+                    read(new_socket, buffer, 1024);
+                    strcat(file_content, buffer);
+                }
+
+                // printf("%s\n", file_content);
+
+                fptr = fopen(filepath, "w");
+                fprintf(fptr, "%s", file_content);
+                fclose(fptr);
+            } else if (strncmp(buffer, "download", 8) == 0) {
+                printf("user download\n");
+
+                char file_to_download[50];
+                sprintf(file_to_download, "%.*s", strlen(buffer) - 9, buffer + 9);
+
+                // file status
+                char *file_exist = "found";
+                char *file_not_exist = "not found";
+
+                // find file
+                int found = 0;
+                struct file *files = parse_files();
+                for (int i = 0; i < n; ++i) {
+                    if (strcmp(files[i].name, file_to_download) == 0) {
+                        found = 1;
+                        break;
+                    }
+                }
+
+                if (found) {
+                    send(new_socket, file_exist, sizeof(file_exist), 0);
+                } else {
+                    send(new_socket, file_not_exist, sizeof(file_not_exist), 0);
+                    continue;
+                }
+
+                sleep(1);
+                // send file
+                char file_length[1024];
+                char *file_content = (char *)malloc(sizeof(char) * 65536);
+                char file_to_open[1024];
+
+                memset(file_length, 0, sizeof(file_length));
+                memset(file_to_open, 0, sizeof(file_to_open));
+                
+                sprintf(file_to_open, "FILES/%s", file_to_download);
+
+                FILE *fptr;
+                fptr = fopen(file_to_open, "r");
+
+                fseek(fptr, 0, SEEK_END);
+                long fsize = ftell(fptr);
+                rewind(fptr);
+
+                fread(file_content, 1, fsize, fptr);
+
+                fclose(fptr);
+
+                // send file size
+                sprintf(file_length, "%ld", fsize);
+                send(new_socket, file_length, sizeof(file_length), 0);
+                sleep(1);
+
+                // send file content
+                for (long i = 0; i < fsize; i += 1024) {
+                    memset(buffer, 0, sizeof(buffer));
+                    sprintf(buffer, "%.*s", fsize < 1024 ? fsize : abs(fsize - i) < 1024 ? abs(fsize - 1) : 1024, file_content + i);
+                    send(new_socket, buffer, sizeof(buffer), 0);
+                }
+
+            } else if (strncmp(buffer, "delete", 6) == 0) {
+                printf("user delete\n");
+
+                char file_to_delete[50];
+                sprintf(file_to_delete, "%.*s", strlen(buffer) - 7, buffer + 7);
+                delete(file_to_delete);
+
+                FILE *fptr;
+                fptr = fopen("running.log", "a");
+
+                fprintf(fptr, "Hapus : %s (%s:%s)\n", file_to_delete, user_id, user_pwd);
+
+                fclose(fptr);
+
+                memset(file_to_delete, 0, sizeof(file_to_delete));
+            } else if (strncmp(buffer, "see", 3) == 0) {
+                printf("user see\n");
+
+                struct file *files = parse_files();
+                char *files_tsv = (char *)malloc(sizeof(char) * 1024);
+
+                sprintf(files_tsv, "%s", see(files, n));
+                send(new_socket, files_tsv, strlen(files_tsv), 0);
+            } else if (strncmp(buffer, "find", 4) == 0) {
+                printf("user find\n");
+
+                char file_to_find[50];
+                sprintf(file_to_find, "%.*s", strlen(buffer) - 5, buffer + 5);
+
+                char *buf = (char *)malloc(sizeof(char) * 1024);
+                memset(buf, 0, sizeof(buf));
+
+                struct file *files = parse_files();
+                for (int i = 0; i < n; ++i) {
+                    char *p;
+                    p = strstr(files[i].name, file_to_find);
+                    if (p) {
+                        sprintf(buf, "%s\nNama: %s\nPublisher: %s\nTahun publishing: %s\nEkstensi File: %s\nFilepath: %s\n", buf, files[i].name, files[i].publisher, 					files[i].year, files[i].ext, files[i].path);
+                    }
+                }
+
+                if (strlen(buf) == 0) {
+                    send(new_socket, file_pattern_not_found, strlen(file_pattern_not_found), 0);
+                } else {
+                    send(new_socket, buf, strlen(buf), 0);
+                }
+            } else {
+                break;
+            }
+            printf("\n");
+        }
+
+        close(new_socket);
     }
 
-    char *hello = "Server Connected";
-    send(new_socket , hello , strlen(hello) , 0 );
-    memset(buffer, 0, 1024);
-    valread = read(new_socket, buffer, 1024);
-    if(strcmp(buffer, "register") == 0 || strcmp(buffer, "Register") == 0 || strcmp(buffer, "REGISTER") == 0)
-    {
-        //read from client
-        memset(buffer, 0, 1024);
-        valread = read(new_socket, buffer, 1024);
-        strcpy(Acc.username, buffer);
-        memset(buffer, 0, 1024);
-        valread = read(new_socket, buffer, 1024);
-        strcpy(Acc.password, buffer);
-        //append data
-        listakun  = fopen ("akun.txt", "a");
-        fprintf(listakun,"%s:%s\n",Acc.username,Acc.password);
-        fclose(listakun);
-        printf("Register Success\n");
-        //read data
-        listakun = fopen("akun.txt","r");
-        while(fscanf(listakun,"%s:%s",Acc.username,Acc.password)>0)
-        {
-            printf("%s:%s\n",Acc.username,Acc.password);
-        }
-        fclose(listakun);
-    }
-    else if(strcmp(buffer, "login") == 0 || strcmp(buffer, "Login") == 0 || strcmp(buffer, "LOGIN") == 0)
-    {
-        //read from client
-        char user[12];
-        char pass[50];
-        memset(buffer, 0, 1024);
-        valread = read(new_socket, buffer, 1024);
-        strcpy(user, buffer);
-        memset(buffer, 0, 1024);
-        valread = read(new_socket, buffer, 1024);
-        strcpy(pass, buffer);
-        memset(buffer, 0, 1024);
-        //read data
-        listakun = fopen("akun.txt","r");
-        while(fscanf(listakun,"%s","%s",Acc.username,Acc.password)>0)
-        {
-            if(strcmp(user, Acc.username) == 0 && strcmp(pass, Acc.password) == 0)
-            {
-                fclose(listakun);
-                printf("\nAuth Success\n");
-                char *success = "Login Success";
-                send(new_socket, success, strlen(success), 0);
-            }
-        }
-        fclose(listakun);
-        printf("\nAuth Failed\n");
-        char *failed = "Login Failed";
-        send(new_socket , failed , strlen(failed) , 0 );
-    }
-    
+    return 0;
 }
 ```
+- Mendefinisikan port server, kemudian membuat struct untuk user yang terdiri dari nama atau id user dan password user. Setelah itu membuat struct untuk files yang berisi nama file dan path filenya sebagai berikut.
+- 
 
 ## Soal 2a
 **Deskripsi:**\
