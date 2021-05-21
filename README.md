@@ -639,3 +639,32 @@ Pada running.log akan merekap apa saja yang terjadi pada file di server
 
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845185461306785862/1h.jpg">
 
+## 2a.
+
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845197525127397376/2a.jpg">
+
+## 2b.
+
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845197541820858389/2b.jpg">
+
+## 2c.
+
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845197561521635368/2c.jpg">
+
+## 3a. 
+
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845198348381585458/3ori.jpg">
+
+### argumen -f
+
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845198362159349820/3a.jpg">
+
+## 3b.
+### argumen -d
+
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845198370699083786/3b.jpg">
+
+## 3c.
+### argumen *
+
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845198372506959872/3c.jpg">
