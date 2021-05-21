@@ -568,3 +568,33 @@ int main() {
 ```c
 
 ```
+# Dokumentasi
+## 1a.
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845181307050786816/1a1.jpg">
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845181336544739338/1a2.jpg">
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845181366915825704/1a3.jpg">
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845183211008688138/1a4.jpg">
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845183247830614016/1a5.jpg">
+## 1b.
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845183967111020594/1b.jpg">
+## 1c.
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845184393962192916/1cbuku1.jpg">
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845184431429910548/1cbuku2.jpg">
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845184431622324254/1cbuku3.jpg">
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845184433853693962/1cbuku4.jpg">
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845184421455724564/1cbuku5.jpg">
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845184812393824256/1c1.jpg">
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845184807248199720/1c2.jpg">
+## 1d.
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845185006674509834/1d1.jpg">
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845185008356425798/1dbuku32.jpg">
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845185011317080094/1dbuku3.jpg">
+## 1e.
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845185287360872458/1e1.jpg">
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845185289080406026/1e2.jpg">
+## 1f.
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845185416046313482/1f.jpg">
+## 1g.
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845185437899161620/1g.jpg">
+## 1h.
+<img src="https://cdn.discordapp.com/attachments/841192613917884436/845185461306785862/1h.jpg">
