@@ -11,19 +11,20 @@ Disusun oleh :
 # Daftar Isi
 
 ---
-* [Soal 1]
-- [Soal](soal-no1)
-- [Pembahasan](pembahasan-no1)
+[Soal 1]
+- [Soal no1](#soal-no1)
+- [Pembahasan](#pembahasan-no1)
 
 ---
-* [Soal 2]
-- [soal](soal-no2)
-- [pembahasan](pembahasan-no2)
+[Soal 2]
+  * [Soal 2a](#soal-2a)
+  * [Soal 2b](#soal-2b)  
+  * [Soal 2c](#soal-2c)
 
 ---
-* [Soal 3]
-- [soal](soal-no3)
-- [pembahasan](pembahasan-no3)
+[Soal 3]
+- [soal](#soal-no3)
+- [pembahasan](#pembahasan-no3)
 
 ---
 # Soal no1
@@ -116,19 +117,17 @@ Hapus : File2.ektensi (id:pass)
 
 
 # Pembahasan no1
-## Client
+## Pembahasan Source Code Client
+
+- mendefinisikan port nya
 ```c
-#include <stdio.h>
-#include <sys/socket.h>
-#include <stdlib.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <math.h>
-
 #define PORT 8080
+```
 
+
+- Jike pembuatan socket tidak berhasil, maka menampilkan `Socket creation error`
+- jika gagal menyambungkan ke server manapun maka tampil `Connection Failed`
+```c
 int main(int argc, char const *argv[]) {
     struct sockaddr_in address;
     int sock = 0;
@@ -144,7 +143,10 @@ int main(int argc, char const *argv[]) {
         printf("\n Socket creation error \n");
         return -1;
     }
-  
+```
+
+- Client akan menginput pilihan login dan register. Setelah itu client akan menginputkan id beserta passwordnya. Data-data ini nantinya akan dikirim ke server. Jika login berhasil maka client akan mendapatkan tampilan login success. Setelah mendapatkan tampilan tersebut, client dapat menginputkan command add untuk menambahkan file, maka client akan diminta untuk memasukkan `Publisher`, `Tahun publikasi`, dan `Filepath-nya`. Kemudian client akan mengirimkan file beserta ukuran dan isinya ke server. Client juga dapat menginputkan command `download` untuk mendownload file dari server. Nantinya client akan menerima file yang didownload dari server. Jika file yang ingin didownload tidak ditemukan maka ditampilkan `"file not found"`. Client juga dapat menginputkan command delete untuk menghapus file yang diinginkan, command ini nantinya akan dikirim ke server. Selain itu, client juga dapat menginputkan command `see` dan client akan menerima data file yang tersedia pada server. Client pun juga dapat menginputkan command `find` untuk mencari file yang ingin dicari pada server, command ini nantinya akan dikirim oleh client ke server dan client nantinya akan menerima file yang dicari pada server.
+```c  
     memset(&serv_addr, '0', sizeof(serv_addr));
   
     serv_addr.sin_family = AF_INET;
@@ -309,20 +311,11 @@ int main(int argc, char const *argv[]) {
 }
 ```
 
-## Server
-```c
-#include <stdio.h>
-#include <sys/socket.h>
-#include <sys/stat.h>
-#include <stdlib.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <unistd.h>
-#include <dirent.h>
-#include <ctype.h>
-#include <math.h>
+## Penjelasan Source Code Server
 
-//mendefinisikan port server
+- Mendefinisikan port server, kemudian membuat struct untuk user yang terdiri dari nama atau id user dan password user. Setelah itu membuat struct untuk files yang berisi nama file dan path filenya sebagai berikut.
+
+```c
 #define PORT 8080
 #define SO_REUSEPORT 15
 
@@ -342,7 +335,10 @@ struct file {
     char ext[20];
     char year[5];
 };
+```
+- Membuat perintah see dimana nantinya akan memunculkan semua file yang ada. Dimana nantinya output yang ditampilkan terdapat Nama Filesnya, Publishernya, Tahun publikasi file, dan Filepathnya.
 
+```c
 char *file_ext(char *file) {
     char *p = strchr(file, '.');
     if (p == NULL) return "exe";
@@ -387,7 +383,11 @@ char *see(struct file files[], int n) {
 
     return buf;
 }
+```
 
+- Setelah itu membuat fungsi find_user dimana fungsi ini digunakan untuk mencari akun atau user yang sudah melakukan pendaftaran. Fungsi ini nantinya akan dijalankan saat user melakukan login
+
+```c
 // untuk mencari user yang ada
 int find_user(char *name, char *pwd) {
     // printf("%s:%s %d:%d\n", name, pwd, strlen(name), strlen(pwd));
@@ -440,7 +440,11 @@ int find_user(char *name, char *pwd) {
     
     return 0;
 }
+```
 
+- Membuat fungsi register untuk membantu user mendaftarkan akun. Fungsi ini juga akan menuliskan atau mengedit daftar nama akun dan password yang akan terdaftar pada akun.txt
+
+```c
 //fungsi register
 void reg(char *name, char *pwd) {
     FILE *fptr;
@@ -453,7 +457,11 @@ void reg(char *name, char *pwd) {
     
     fclose(fptr);
 }
+```
 
+- Membuat struct files yang nantinya akan menjadi database pada program ini. Database ini menyimpan nama file, path file, nama publisher dan tahun publish dari file-file yang sudah ditambahkan sebelumnya
+
+```c
 //membuat struct files yang akan menjadi databasenya
 struct file *parse_files() {
     n = 0;
@@ -518,7 +526,11 @@ struct file *parse_files() {
 
     return files;
 }
+```
 
+- Setelah itu membuat fungsi delete dimana fungsi ini akan menghapus file yang tersimpan di server dengan mengganti namanya menjadi old-(namafile).ekstensi. Jika gagal merename nama file yang akan dihapus maka ditampilkan "error renaming (nama file sebelum dihapus) to (nama file sesudah dihapus). Setelah itu, program akan menghapus row dari file ini pada database file.tsv
+
+```c
 //fungsi delete untuk menghapus file yang sudah ditambahkan sebelumnya
 void delete(char *file) {
     struct file *files = parse_files();
@@ -565,7 +577,17 @@ void delete(char *file) {
 
     fclose(fptr);
 }
+```
 
+- Untuk di fungsi main, nantinya jika server telah tersambung dengan client maka server akan mengirimkan pilihan untuk login atau register pada client. Kemudian jika client memilih register, maka client diminta untuk menginputkan id dan password untuk akunnya. Setelah pendaftaran akun selesai, server akan mengirim pesan register success pada client. Namun, jika client memilih pilihan login, maka client diminta untuk memasukkan id dan password yang telah ia daftarkan sebelumnya. Jika berhasil masuk, server akan menampilkan login success. Kemudian server akan menerima command add dari client yang nantinya akan menambahkan file, setelah itu server akan mengirimkan format penambahan file yang akan dimasukkan oleh client sebagai berikut.
+```
+Publisher:
+Tahun Publikasi:
+Filepath:
+```
+Kemudian pada `file.tsv` menyimpan file yang baru ditambahkan tersebut sedangkan pada running.log akan mencatat command add, path, nama user, dan password user yang menambahkan file tersebut. Setelah itu server akan menerima file, ukuran file, dan isi dari file tersebut. Selain menerima command add, server juga menerima command download dari client. Server nantinya akan mencari file yang client ingin download kemudian mengirim file beserta ukuran dan isinya ke client. Server juga dapat menerima command delete, setelah menerima command ini server akan memanggil fungsi delete dan mencatatkan record command Hapus file pada running.log. Server pun juga dapat menerima command see dari client yang nantinya akan memanggil fungsi see yang memperlihatkan file yang ada pada server dan mengirimkannya ke client. Dan command terakhir yang dapat diterima oleh server adalah command find. Command ini nantinya akan mencari file yang dicari oleh client dan mengirimkannya ke client.
+
+```c
 int main(int argc, char const *argv[]) {
     int server_fd, new_socket;
     struct sockaddr_in address;
@@ -846,8 +868,6 @@ int main(int argc, char const *argv[]) {
     return 0;
 }
 ```
-- Mendefinisikan port server, kemudian membuat struct untuk user yang terdiri dari nama atau id user dan password user. Setelah itu membuat struct untuk files yang berisi nama file dan path filenya sebagai berikut.
-- 
 
 ## Soal 2a
 **Deskripsi:**\
@@ -1147,24 +1167,105 @@ int main() {
 - Selanjutnya akan dilakukan pengecekan program diatas agar tidak terjadi kendala lag pada saat menjalankannya dengan perintah `for()` pada setiap command `“ps aux | sort -nrk 3,3 | head -5”`
  
 ## soal 3
+Seorang mahasiswa bernama Alex sedang mengalami masa gabut. Di saat masa gabutnya, ia memikirkan untuk merapikan sejumlah file yang ada di laptopnya. Karena jumlah filenya terlalu banyak, Alex meminta saran ke Ayub. Ayub menyarankan untuk membuat sebuah program C agar file-file dapat dikategorikan. Program ini akan memindahkan file sesuai ekstensinya ke dalam folder sesuai ekstensinya yang folder hasilnya terdapat di working directory ketika program kategori tersebut dijalankan.
+
+Contoh apabila program dijalankan:
+```
+# Program soal3 terletak di /home/izone/soal3
+$ ./soal3 -f path/to/file1.jpg path/to/file2.c path/to/file3.zip
+#Hasilnya adalah sebagai berikut
+/home/izone
+|-jpg
+|--file1.jpg
+|-c
+|--file2.c
+|-zip
+|--file3.zip
+```
+
+a). Program menerima opsi -f seperti contoh di atas, jadi pengguna bisa menambahkan argumen file yang bisa dikategorikan sebanyak yang diinginkan oleh pengguna. 
+Output yang dikeluarkan adalah seperti ini :
+```
+File 1 : Berhasil Dikategorikan (jika berhasil)
+File 2 : Sad, gagal :( (jika gagal)
+File 3 : Berhasil Dikategorikan
+```
+
+b). Program juga dapat menerima opsi -d untuk melakukan pengkategorian pada suatu directory. Namun pada opsi -d ini, user hanya bisa memasukkan input 1 directory saja, tidak seperti file yang bebas menginput file sebanyak mungkin. Contohnya adalah seperti ini:
+```
+$ ./soal3 -d /path/to/directory/
+```
+Perintah di atas akan mengkategorikan file di /path/to/directory, lalu hasilnya akan disimpan di working directory dimana program C tersebut berjalan (hasil kategori filenya bukan di /path/to/directory).
+Output yang dikeluarkan adalah seperti ini :
+```
+Jika berhasil, print “Direktori sukses disimpan!”
+Jika gagal, print “Yah, gagal disimpan :(“
+```
+
+c). Selain menerima opsi-opsi di atas, program ini menerima opsi *, contohnya ada di bawah ini:
+```
+$ ./soal3 \*
+```
+
+Opsi ini akan mengkategorikan seluruh file yang ada di working directory ketika menjalankan program C tersebut.
+
+c). Semua file harus berada di dalam folder, jika terdapat file yang tidak memiliki ekstensi, file disimpan dalam folder “Unknown”. Jika file hidden, masuk folder “Hidden”.
+d). Setiap 1 file yang dikategorikan dioperasikan oleh 1 thread agar bisa berjalan secara paralel sehingga proses kategori bisa berjalan lebih cepat.
+
+
+
+- di dalam int main terdapat 3 if else
+- if yang pertama mengecek apakah argv berupa `"-f"` atau tidak jika iya maka program akan mengkategorikan file dengan menjalankan function `categorize_files`
+- if yang kedua mengecek apakah argv berupa `"-d"` atau tidak jika iya maka program akan melakukan pengecekan kembali apakah argc tidak sama dengan 3 atau sama, jika tidak sama maka akan menjalankan error. Dilanjutkan dengan menjalankan function categorize_dir yang akan mengkategorikan file.
+- if yang terakhir mengecek apakah `argv` berupa `""` atau tidak, jika iya maka program akan megecek kembali apakah `argc` lebih dari 2, jika iya maka akan menjalankan error, namun jika tidak akan menjalankan function categorize_dir yang berfungsi untuk mengkategorikan file. Karena argv berupa `""` maka yang dikategorikan filenya adalah file yang di direktori saat ini
 
 ```c
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <pthread.h>
-#include <errno.h>
-```
-- pertama kita masukkan library yang akan digunakan nantinya
+    if (strcmp("-f", argv[1]) == 0) {
+        if (argc < 3) err();
 
-```c
+        categorize_files(argc, argv, active_dir);
+    } else if (strcmp("-d", argv[1]) == 0) {
+        if (argc != 3) err();
+        mode = 1;
 
+        sprintf(dir, "%s", argv[2]);
+
+        categorize_dir(dir, active_dir, dir);
+
+        for (int i = 0; i < current_thread; ++i) {
+            pthread_join(tid[i], NULL);
+        }
+
+        if (status) {
+            printf("Direktori sukses disimpan!\n");
+        } else {
+            printf("Yah, gagal disimpan :(\n");
+        }
+    } else if (strcmp("*", argv[1]) == 0) {
+        if (argc > 2) err();
+        mode = 1;
+
+        getcwd(dir, 1024);
+
+        categorize_dir(dir, active_dir, active_dir);
+
+        for (int i = 0; i < current_thread; ++i) {
+            pthread_join(tid[i], NULL);
+        }
+
+        if (status) {
+            printf("Direktori sukses disimpan!\n");
+        } else {
+            printf("Yah, gagal disimpan :(\n");
+        }
+    } else {
+        err();
+    }
+
+    exit(EXIT_SUCCESS);
+}
 ```
+
 # Dokumentasi
 ## 1a.
 ### Register
