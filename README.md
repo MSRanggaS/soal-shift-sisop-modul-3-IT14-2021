@@ -571,38 +571,47 @@ int main() {
 # Dokumentasi
 ## 1a.
 ### Register
+
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845181307050786816/1a1.jpg">
 
 ### Login
+
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845181336544739338/1a2.jpg">
 
 ### akun.txt
+
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845181366915825704/1a3.jpg">
 
 ### Antri client
+
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845183211008688138/1a4.jpg">
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845183247830614016/1a5.jpg">
 
 ## 1b.
 ### files.tsv
 files.tsv ini akan terisi apabila sudah melakukan command add
+
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845183967111020594/1b.jpg">
 
 ## 1c.
 ### 5 file yang akan diupload
 Berikut adalah 5 file yang akan diupload ke server beserta isi tiap file
+
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845184393962192916/1cbuku1.jpg">
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845184431429910548/1cbuku2.jpg">
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845184431622324254/1cbuku3.jpg">
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845184433853693962/1cbuku4.jpg">
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845184421455724564/1cbuku5.jpg">
+
 ### command add
+
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845184812393824256/1c1.jpg">
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845184807248199720/1c2.jpg">
 
 ## 1d.
 ### command download
 Pada command download ini kami memberi percobaan dengan mengedit isi file yang akan di download pada server, setelah di download maka benar terlihat bahwa isi file berubah.
+
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845185011317080094/1dbuku3.jpg">
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845185006674509834/1d1.jpg">
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845185008356425798/1dbuku32.jpg">
@@ -610,19 +619,23 @@ Pada command download ini kami memberi percobaan dengan mengedit isi file yang a
 ## 1e.
 ### command delete
 Bisa dilihat pada file.tsv, bahwa file yang dihapus maka di file.tsv juga terhapus 
+
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845185287360872458/1e1.jpg">
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845185289080406026/1e2.jpg">
 
 ## 1f.
 ### command see
+
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845185416046313482/1f.jpg">
 
 ## 1g.
 ### command find
+
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845185437899161620/1g.jpg">
 
 ## 1h.
 ### running.log
 Pada running.log akan merekap apa saja yang terjadi pada file di server
+
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845185461306785862/1h.jpg">
 
