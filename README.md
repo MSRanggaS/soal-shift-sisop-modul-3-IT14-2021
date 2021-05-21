@@ -4,7 +4,7 @@ Repository Sebagai Laporan Resmi Soal Shift Modul 3 Praktikum Sistem Operasi 202
 Disusun oleh :
 
 - Romandhika Rijal I (0531180000048)
-- M. Shaladin Rangga (05311940000029)
+- Moch. Shaladin Rangga (05311940000029)
 - Moh. Ibadul Haqqi (05311940000037)
 
 ---
@@ -572,10 +572,13 @@ int main() {
 ## 1a.
 ### Register
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845181307050786816/1a1.jpg">
+
 ### Login
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845181336544739338/1a2.jpg">
+
 ### akun.txt
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845181366915825704/1a3.jpg">
+
 ### Antri client
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845183211008688138/1a4.jpg">
 <img src="https://cdn.discordapp.com/attachments/841192613917884436/845183247830614016/1a5.jpg">
