@@ -27,6 +27,12 @@ Disusun oleh :
 - [pembahasan](#pembahasan-no3)
 
 ---
+
+Untuk yang di revisi adalah:
+- 1a sampai 1h
+- nomer 3 argumen -f
+
+
 # Soal no1
 Keverk adalah orang yang cukup ambisius dan terkenal di angkatannya. Sebelum dia menjadi ketua departemen di HMTC, dia pernah mengerjakan suatu proyek dimana keverk tersebut meminta untuk membuat server database buku. Proyek ini diminta agar dapat digunakan oleh pemilik aplikasi dan diharapkan bantuannya dari pengguna aplikasi ini.
 
