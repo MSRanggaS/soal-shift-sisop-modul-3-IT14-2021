@@ -28,11 +28,6 @@ Disusun oleh :
 
 ---
 
-Untuk yang di revisi adalah:
-- 1a sampai 1h
-- nomer 3 argumen -f
-
-
 # Soal no1
 Keverk adalah orang yang cukup ambisius dan terkenal di angkatannya. Sebelum dia menjadi ketua departemen di HMTC, dia pernah mengerjakan suatu proyek dimana keverk tersebut meminta untuk membuat server database buku. Proyek ini diminta agar dapat digunakan oleh pemilik aplikasi dan diharapkan bantuannya dari pengguna aplikasi ini.
 
@@ -874,6 +869,8 @@ int main(int argc, char const *argv[]) {
     return 0;
 }
 ```
+Kendala:
+Karena kurangnya waktu, soal nomer 1 belum sempat selesai sampai batas waktu pengumpulan.
 
 ## Soal 2a
 **Deskripsi:**\
@@ -1171,6 +1168,9 @@ int main() {
 ```
 - Disini akan dilakukan `fork()` dan untuk parent proccesnya, dia akan membuat copy `fp[1]` yang berfungsi sebagai `write` end dari pipe
 - Selanjutnya akan dilakukan pengecekan program diatas agar tidak terjadi kendala lag pada saat menjalankannya dengan perintah `for()` pada setiap command `“ps aux | sort -nrk 3,3 | head -5”`
+
+Kendala:
+Tidak ada
  
 ## soal 3
 Seorang mahasiswa bernama Alex sedang mengalami masa gabut. Di saat masa gabutnya, ia memikirkan untuk merapikan sejumlah file yang ada di laptopnya. Karena jumlah filenya terlalu banyak, Alex meminta saran ke Ayub. Ayub menyarankan untuk membuat sebuah program C agar file-file dapat dikategorikan. Program ini akan memindahkan file sesuai ekstensinya ke dalam folder sesuai ekstensinya yang folder hasilnya terdapat di working directory ketika program kategori tersebut dijalankan.
@@ -1271,6 +1271,8 @@ d). Setiap 1 file yang dikategorikan dioperasikan oleh 1 thread agar bisa berjal
     exit(EXIT_SUCCESS);
 }
 ```
+Kendala:
+Masih belum menguasai penggunaan thread sehingga sedikit kebingungan dalam melakukan hal yang diminta soal
 
 # Dokumentasi
 ## 1a.
